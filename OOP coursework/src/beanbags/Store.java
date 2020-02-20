@@ -5,30 +5,73 @@ import java.io.IOException;
 public class Store {
     public static void main(String[] args){
         ObjectArrayList stock = new ObjectArrayList();
+        ObjectArrayList reservations = new ObjectArrayList();
+
         BeanBagStore store = new BeanBagStore() {
             @Override
             public void addBeanBags(int num, String manufacturer, String name, String id, short year, byte month) throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException, IllegalIDException, InvalidMonthException {
-                stock.add(new BeanBag(id, name, manufacturer, year, month));
+                if (num<1) {
+                    throw IllegalNumberOfBeanBagsAddedException;
+                }
+                for (BeanBag b :
+                        stock) {
+                    if (Integer.toHexString(b.getID).equals(id)){
+                        if(!b.getName().equals(name))
+                            throw BeanBagMismatchException;
+                        if(!b.getManufacturer().equals(manufacturer))
+                            throw BeanBagMismatchException;
+                    }
+                }
+
+                for (int i = 0; i < num; i++) {
+                    stock.add(new BeanBag(id, name, manufacturer, year, month));
+                }
+                
             }
 
             @Override
             public void addBeanBags(int num, String manufacturer, String name, String id, short year, byte month, String information) throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException, IllegalIDException, InvalidMonthException {
-
+                for (int i = 0; i < num; i++) {
+                    stock.add(new BeanBag(id, name, manufacturer, year, month, information));
+                }
             }
 
             @Override
             public void setBeanBagPrice(String id, int priceInPence) throws InvalidPriceException, BeanBagIDNotRecognisedException, IllegalIDException {
-
+                for (BeanBag b :
+                        stock) {
+                    if (Integer.toHexString(b.getID).equals(id)){
+                        b.setPrice(priceInPence);
+                    }
+                }
             }
 
             @Override
             public void sellBeanBags(int num, String id) throws BeanBagNotInStockException, InsufficientStockException, IllegalNumberOfBeanBagsSoldException, PriceNotSetException, BeanBagIDNotRecognisedException, IllegalIDException {
-
+                int counter = 0;
+                int counter2 = 0;
+                while (counter < num) {
+                    if (Integer.toHexString(stock.get(counter2).getID).equals(id) && stock.get(counter2).getAvailable()){
+                        stock.get(counter2).setSold();
+                        counter++;
+                    }
+                    counter2++;
+                }
             }
 
             @Override
             public int reserveBeanBags(int num, String id) throws BeanBagNotInStockException, InsufficientStockException, IllegalNumberOfBeanBagsReservedException, PriceNotSetException, BeanBagIDNotRecognisedException, IllegalIDException {
-                return 0;
+                int counter = 0;
+                int counter2 = 0;
+                int reservationNumber;
+                while (counter < num) {
+                    if (stock.get(counter2).getID.equals(id) && stock.get(counter2).getAvailable()){
+                        stock.get(counter2).setReserved();
+                        reservationNumber = counter2;
+                        counter++;
+                    }
+                    counter2++;
+                }
             }
 
             @Override
