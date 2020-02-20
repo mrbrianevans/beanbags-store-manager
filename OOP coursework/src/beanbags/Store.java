@@ -12,12 +12,12 @@ public class Store {
         BeanBagStore store = new BeanBagStore() {
             @Override
             public void addBeanBags(int num, String manufacturer, String name, String id, short year, byte month) throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException, IllegalIDException, InvalidMonthException {
-                if (num<1) throw IllegalNumberOfBeanBagsAddedException;
+                if (num<1) throw new IllegalNumberOfBeanBagsAddedException();
                 for (BeanBag b :
-                        stock) {
+                        stock) { //this needs to be a fori loop instead
                     if (Integer.toHexString(b.getID).equals(id)){
-                        if(!b.getName().equals(name)) throw BeanBagMismatchException;
-                        if(!b.getManufacturer().equals(manufacturer)) throw BeanBagMismatchException;
+                        if(!b.getName().equals(name)) throw new BeanBagMismatchException();
+                        if(!b.getManufacturer().equals(manufacturer)) throw new BeanBagMismatchException();
                     }
                 }
 
