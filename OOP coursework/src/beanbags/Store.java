@@ -3,6 +3,8 @@ package beanbags;
 import java.io.IOException;
 
 public class Store {
+
+
     public static void main(String[] args){
         ObjectArrayList stock = new ObjectArrayList();
         ObjectArrayList reservations = new ObjectArrayList();
@@ -10,16 +12,12 @@ public class Store {
         BeanBagStore store = new BeanBagStore() {
             @Override
             public void addBeanBags(int num, String manufacturer, String name, String id, short year, byte month) throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException, IllegalIDException, InvalidMonthException {
-                if (num<1) {
-                    throw IllegalNumberOfBeanBagsAddedException;
-                }
+                if (num<1) throw IllegalNumberOfBeanBagsAddedException;
                 for (BeanBag b :
                         stock) {
                     if (Integer.toHexString(b.getID).equals(id)){
-                        if(!b.getName().equals(name))
-                            throw BeanBagMismatchException;
-                        if(!b.getManufacturer().equals(manufacturer))
-                            throw BeanBagMismatchException;
+                        if(!b.getName().equals(name)) throw BeanBagMismatchException;
+                        if(!b.getManufacturer().equals(manufacturer)) throw BeanBagMismatchException;
                     }
                 }
 
