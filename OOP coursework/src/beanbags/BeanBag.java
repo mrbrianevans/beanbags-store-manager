@@ -19,12 +19,12 @@ public class BeanBag {
         this.month = month;
     }
 
-    public BeanBag(String ID, String name, String manufacturer, String year, String month, String information){
+    public BeanBag(String ID, String name, String manufacturer, short year, byte month, String information){
         this.ID = Integer.parseInt(ID,16);
         this.name = name;
         this.manufacturer = manufacturer;
-        this.year = (short)Integer.parseInt(year);
-        this.month = (byte)Integer.parseInt(month);
+        this.year = year;
+        this.month = month;
         this.information = information;
     }
 
