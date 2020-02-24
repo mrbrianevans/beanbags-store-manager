@@ -2,160 +2,258 @@ package beanbags;
 
 import java.io.IOException;
 
-public class Store {
+public class Store implements BeanBagStore{
+
+    ObjectArrayList stock = new ObjectArrayList();
+    int nextReservation = 1;
+    ObjectArrayList reservations = new ObjectArrayList();
 
 
-    public static void main(String[] args){
-        ObjectArrayList stock = new ObjectArrayList();
-        ObjectArrayList reservations = new ObjectArrayList();
-
-        BeanBagStore store = new BeanBagStore() {
-            @Override
-            public void addBeanBags(int num, String manufacturer, String name, String id, short year, byte month) throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException, IllegalIDException, InvalidMonthException {
-                if (num<1) throw new IllegalNumberOfBeanBagsAddedException();
-                for (BeanBag b :
-                        stock) { //this needs to be a fori loop instead
-                    if (Integer.toHexString(b.getID).equals(id)){
-                        if(!b.getName().equals(name)) throw new BeanBagMismatchException();
-                        if(!b.getManufacturer().equals(manufacturer)) throw new BeanBagMismatchException();
-                    }
-                }
-
-                for (int i = 0; i < num; i++) {
-                    stock.add(new BeanBag(id, name, manufacturer, year, month));
-                }
-                
+    @Override
+    public void addBeanBags(int num, String manufacturer, String name, String id, short year, byte month) throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException, IllegalIDException, InvalidMonthException {
+        if (num<1) throw new IllegalNumberOfBeanBagsAddedException();
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (Integer.toHexString(b.getID()).equals(id)){
+                if(!b.getName().equals(name)) throw new BeanBagMismatchException("ID already exists with different name.");
+                if(!b.getManufacturer().equals(manufacturer)) throw new BeanBagMismatchException("ID already exists with different manufacturer.");
+            }
+            if (id.length() != 8){
+                throw new IllegalIDException("ID length invalid.");
+            }
+            try{
+                Integer.parseInt(id, 16);
+            } catch(Exception e){
+                throw new IllegalIDException("Not a hexadecimal number.");
             }
 
-            @Override
-            public void addBeanBags(int num, String manufacturer, String name, String id, short year, byte month, String information) throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException, IllegalIDException, InvalidMonthException {
-                for (int i = 0; i < num; i++) {
-                    stock.add(new BeanBag(id, name, manufacturer, year, month, information));
-                }
+            if(month > 12 || month < 1){
+                throw new InvalidMonthException("The month entered is not valid.");
+            }
+        }
+
+        for (int i = 0; i < num; i++) {
+            stock.add(new BeanBag(id, name, manufacturer, year, month));
+        }
+    }
+
+    @Override
+    public void addBeanBags(int num, String manufacturer, String name, String id, short year, byte month, String information) throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException, IllegalIDException, InvalidMonthException {
+        if (num<1) throw new IllegalNumberOfBeanBagsAddedException();
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (Integer.toHexString(b.getID()).equals(id)){
+                if(!b.getName().equals(name)) throw new BeanBagMismatchException("ID already exists with different name.");
+                if(!b.getManufacturer().equals(manufacturer)) throw new BeanBagMismatchException("ID already exists with different manufacturer.");
+            }
+            if (id.length() != 8){
+                throw new IllegalIDException("ID length invalid.");
+            }
+            try{
+                Integer.parseInt(id, 16);
+            } catch(Exception e){
+                throw new IllegalIDException("Not a hexadecimal number.");
             }
 
-            @Override
-            public void setBeanBagPrice(String id, int priceInPence) throws InvalidPriceException, BeanBagIDNotRecognisedException, IllegalIDException {
-                for (BeanBag b :
-                        stock) {
-                    if (Integer.toHexString(b.getID).equals(id)){
-                        b.setPrice(priceInPence);
-                    }
-                }
+            if(month > 12 || month < 1){
+                throw new InvalidMonthException("The month entered is not valid.");
             }
+        }
 
-            @Override
-            public void sellBeanBags(int num, String id) throws BeanBagNotInStockException, InsufficientStockException, IllegalNumberOfBeanBagsSoldException, PriceNotSetException, BeanBagIDNotRecognisedException, IllegalIDException {
-                int counter = 0;
-                int counter2 = 0;
-                while (counter < num) {
-                    if (Integer.toHexString(stock.get(counter2).getID).equals(id) && stock.get(counter2).getAvailable()){
-                        stock.get(counter2).setSold();
-                        counter++;
-                    }
-                    counter2++;
-                }
+        for (int i = 0; i < num; i++) {
+            stock.add(new BeanBag(id, name, manufacturer, year, month, information));
+        }
+    }
+
+    @Override
+    public void setBeanBagPrice(String id, int priceInPence) throws InvalidPriceException, BeanBagIDNotRecognisedException, IllegalIDException {
+        if (priceInPence < 1){
+            throw new InvalidPriceException("The price is less than 1");
+        }
+
+        int counter = 0;
+
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (Integer.toHexString(b.getID()).equals(id)){
+                b.setPrice(priceInPence);
+                stock.replace(b, i);
+                counter ++;
             }
+        }
 
-            @Override
-            public int reserveBeanBags(int num, String id) throws BeanBagNotInStockException, InsufficientStockException, IllegalNumberOfBeanBagsReservedException, PriceNotSetException, BeanBagIDNotRecognisedException, IllegalIDException {
-                int counter = 0;
-                int counter2 = 0;
-                int reservationNumber;
-                while (counter < num) {
-                    if (stock.get(counter2).getID.equals(id) && stock.get(counter2).getAvailable()){
-                        stock.get(counter2).setReserved();
-                        reservationNumber = counter2;
-                        counter++;
-                    }
-                    counter2++;
-                }
+        if(counter == 0){
+            throw new BeanBagIDNotRecognisedException("The id is valid but not found");
+        }
+
+        if (id.length() != 8){
+            throw new IllegalIDException("ID length invalid.");
+        }
+        try{
+            Integer.parseInt(id, 16);
+        } catch(Exception e){
+            throw new IllegalIDException("Not a hexadecimal number.");
+        }
+    }
+
+    @Override
+    public void sellBeanBags(int num, String id) throws BeanBagNotInStockException, InsufficientStockException, IllegalNumberOfBeanBagsSoldException, PriceNotSetException, BeanBagIDNotRecognisedException, IllegalIDException {
+        int counter = 0;
+        int counter2 = 0;
+
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (!b.getSold() && b.getStringID().equals(id)){
+                counter++;
             }
-
-            @Override
-            public void unreserveBeanBags(int reservationNumber) throws ReservationNumberNotRecognisedException {
-
+            if (b.getPrice() < 1 && b.getStringID().equals(id)){
+                throw new PriceNotSetException("The bean bag is in stock, but no price has been set.");
             }
+        }
+        if (counter == 0){
+            throw new BeanBagNotInStockException("There are no bags of the type wanted in stock.");
+        }
+        if (counter < num){
+            throw new InsufficientStockException("There are only "+counter+" bags in stock.");
+        }
+        if (num < 1){
+            throw new IllegalNumberOfBeanBagsSoldException("At least one bean bag must be sold.");
+        }
 
-            @Override
-            public void sellBeanBags(int reservationNumber) throws ReservationNumberNotRecognisedException {
-
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (Integer.toHexString(b.getID()).equals(id)){
+                counter2 ++;
             }
+        }
 
-            @Override
-            public int beanBagsInStock() {
-                return 0;
+        if (counter2 == 0){
+            throw new BeanBagIDNotRecognisedException("The id is not recognised");
+        }
+
+        if (id.length() != 8){
+            throw new IllegalIDException("ID length invalid.");
+        }
+        try{
+            Integer.parseInt(id, 16);
+        } catch(Exception e){
+            throw new IllegalIDException("Not a hexadecimal number.");
+        }
+
+        counter = 0;
+        counter2 = 0;
+
+        while (counter < num) {
+            BeanBag b = (BeanBag) stock.get(counter2);
+            if (b.getStringID().equals(id) && b.getAvailable()){
+                b.setSold();
+                stock.replace(b, counter2);
+                counter++;
             }
+            counter2++;
+        }
 
-            @Override
-            public int reservedBeanBagsInStock() {
-                return 0;
+    }
+
+    @Override
+    public int reserveBeanBags(int num, String id) throws BeanBagNotInStockException, InsufficientStockException, IllegalNumberOfBeanBagsReservedException, PriceNotSetException, BeanBagIDNotRecognisedException, IllegalIDException {
+        int counter = 0;
+        int counter2 = 0;
+
+        while (counter < num) {
+            BeanBag b = (BeanBag) stock.get(counter2);
+            if (b.getStringID().equals(id) && b.getAvailable()){
+                b.setReserved();
+                reservationNumber = counter2;
+                stock.replace(b, counter2);
+                counter++;
             }
+            counter2++;
+        }
+    }
 
-            @Override
-            public int beanBagsInStock(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
-                return 0;
-            }
+    @Override
+    public void unreserveBeanBags(int reservationNumber) throws ReservationNumberNotRecognisedException {
 
-            @Override
-            public void saveStoreContents(String filename) throws IOException {
+    }
 
-            }
+    @Override
+    public void sellBeanBags(int reservationNumber) throws ReservationNumberNotRecognisedException {
 
-            @Override
-            public void loadStoreContents(String filename) throws IOException, ClassNotFoundException {
+    }
 
-            }
+    @Override
+    public int beanBagsInStock() {
+        return 0;
+    }
 
-            @Override
-            public int getNumberOfDifferentBeanBagsInStock() {
-                return 0;
-            }
+    @Override
+    public int reservedBeanBagsInStock() {
+        return 0;
+    }
 
-            @Override
-            public int getNumberOfSoldBeanBags() {
-                return 0;
-            }
+    @Override
+    public int beanBagsInStock(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
+        return 0;
+    }
 
-            @Override
-            public int getNumberOfSoldBeanBags(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
-                return 0;
-            }
+    @Override
+    public void saveStoreContents(String filename) throws IOException {
 
-            @Override
-            public int getTotalPriceOfSoldBeanBags() {
-                return 0;
-            }
+    }
 
-            @Override
-            public int getTotalPriceOfSoldBeanBags(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
-                return 0;
-            }
+    @Override
+    public void loadStoreContents(String filename) throws IOException, ClassNotFoundException {
 
-            @Override
-            public int getTotalPriceOfReservedBeanBags() {
-                return 0;
-            }
+    }
 
-            @Override
-            public String getBeanBagDetails(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
-                return null;
-            }
+    @Override
+    public int getNumberOfDifferentBeanBagsInStock() {
+        return 0;
+    }
 
-            @Override
-            public void empty() {
+    @Override
+    public int getNumberOfSoldBeanBags() {
+        return 0;
+    }
 
-            }
+    @Override
+    public int getNumberOfSoldBeanBags(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
+        return 0;
+    }
 
-            @Override
-            public void resetSaleAndCostTracking() {
+    @Override
+    public int getTotalPriceOfSoldBeanBags() {
+        return 0;
+    }
 
-            }
+    @Override
+    public int getTotalPriceOfSoldBeanBags(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
+        return 0;
+    }
 
-            @Override
-            public void replace(String oldId, String replacementId) throws BeanBagIDNotRecognisedException, IllegalIDException {
+    @Override
+    public int getTotalPriceOfReservedBeanBags() {
+        return 0;
+    }
 
-            }
-        };
+    @Override
+    public String getBeanBagDetails(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
+        return null;
+    }
+
+    @Override
+    public void empty() {
+
+    }
+
+    @Override
+    public void resetSaleAndCostTracking() {
+
+    }
+
+    @Override
+    public void replace(String oldId, String replacementId) throws BeanBagIDNotRecognisedException, IllegalIDException {
+
     }
 }
