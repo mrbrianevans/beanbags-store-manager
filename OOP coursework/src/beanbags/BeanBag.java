@@ -34,6 +34,7 @@ public class BeanBag {
 
     public void setSold(){
         this.sold = true;
+        this.reservationNumber = 0;
     }
 
 
@@ -49,43 +50,41 @@ public class BeanBag {
         this.ID = Integer.parseInt(ID, 16);
     }
 
-    public int getID(){
-        return this.ID;
-    } // dont need 'this.' - just the parameter name.
 
-    public String getStringID(){
-        return this.ID+"";
+
+    public String getID(){
+        return ID+"";
     }
 
     public String getInformation(){
-        return this.information;
+        return information;
     }
 
     public boolean getReserved(){
-        return this.reservationNumber!=0;
+        return reservationNumber!=0;
     }
 
     public boolean getSold(){
-        return this.sold;
+        return sold;
     }
 
     public double getPrice(){
-        return this.price;
+        return price;
     }
 
     public String getName(){
-        return this.name;
+        return name;
     }
 
     public String getManufacturer(){
-        return this.manufacturer;
+        return manufacturer;
     }
 
     public boolean getAvailable(){
-        return this.getReserved() && this.getSold();
+        return getReserved() && getSold();
     }
 
     public int getReservationNumber(){
-        return this.reservationNumber;
+        return reservationNumber;
     }
 }

@@ -14,7 +14,7 @@ public class Store implements BeanBagStore{
         if (num<1) throw new IllegalNumberOfBeanBagsAddedException();
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if (Integer.toHexString(b.getID()).equals(id)){
+            if (b.getID().equals(id)){
                 if(!b.getName().equals(name)) throw new BeanBagMismatchException("ID already exists with different name.");
                 if(!b.getManufacturer().equals(manufacturer)) throw new BeanBagMismatchException("ID already exists with different manufacturer.");
             }
@@ -42,7 +42,7 @@ public class Store implements BeanBagStore{
         if (num<1) throw new IllegalNumberOfBeanBagsAddedException();
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if (Integer.toHexString(b.getID()).equals(id)){
+            if (b.getID().equals(id)){
                 if(!b.getName().equals(name)) throw new BeanBagMismatchException("ID already exists with different name.");
                 if(!b.getManufacturer().equals(manufacturer)) throw new BeanBagMismatchException("ID already exists with different manufacturer.");
             }
@@ -75,7 +75,7 @@ public class Store implements BeanBagStore{
 
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if (Integer.toHexString(b.getID()).equals(id)){
+            if (b.getID().equals(id)){
                 b.setPrice(priceInPence);
                 stock.replace(b, i);
                 counter ++;
@@ -103,10 +103,10 @@ public class Store implements BeanBagStore{
 
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if (!b.getSold() && b.getStringID().equals(id)){
+            if (b.getAvailable() && b.getID().equals(id)){
                 counter++;
             }
-            if (b.getPrice() < 1 && b.getStringID().equals(id)){
+            if (b.getPrice() < 1 && b.getID().equals(id)){
                 throw new PriceNotSetException("The bean bag is in stock, but no price has been set.");
             }
         }
@@ -122,7 +122,7 @@ public class Store implements BeanBagStore{
 
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if (Integer.toHexString(b.getID()).equals(id)){
+            if (b.getID().equals(id)){
                 counter2 ++;
             }
         }
@@ -145,7 +145,7 @@ public class Store implements BeanBagStore{
 
         while (counter < num) {
             BeanBag b = (BeanBag) stock.get(counter2);
-            if (b.getStringID().equals(id) && b.getAvailable()){
+            if (b.getID().equals(id) && b.getAvailable()){
                 b.setSold();
                 stock.replace(b, counter2);
                 counter++;
@@ -160,41 +160,125 @@ public class Store implements BeanBagStore{
         int counter = 0;
         int counter2 = 0;
 
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getAvailable() && b.getID().equals(id)){
+                counter++;
+            }
+            if (b.getPrice() < 1 && b.getID().equals(id)){
+                throw new PriceNotSetException("The bean bag is in stock, but no price has been set.");
+            }
+        }
+        if (counter == 0){
+            throw new BeanBagNotInStockException("There are no bags of the type wanted in stock.");
+        }
+        if (counter < num){
+            throw new InsufficientStockException("There are only "+counter+" bags in stock.");
+        }
+        if (num < 1){
+            throw new IllegalNumberOfBeanBagsSoldException("At least one bean bag must be reserved.");
+        }
+
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getID().equals(id)){
+                counter2 ++;
+            }
+        }
+
+        if (counter2 == 0){
+            throw new BeanBagIDNotRecognisedException("The id is not recognised");
+        }
+
+        if (id.length() != 8){
+            throw new IllegalIDException("ID length invalid.");
+        }
+        try{
+            Integer.parseInt(id, 16);
+        } catch(Exception e){
+            throw new IllegalIDException("Not a hexadecimal number.");
+        }
+
+        counter = 0;
+        counter2 = 0;
+
         while (counter < num) {
             BeanBag b = (BeanBag) stock.get(counter2);
-            if (b.getStringID().equals(id) && b.getAvailable()){
-                b.setReserved();
-                reservationNumber = counter2;
+            if (b.getID().equals(id) && b.getAvailable()){
+                b.setReserved(nextReservation);
                 stock.replace(b, counter2);
                 counter++;
             }
             counter2++;
         }
+        nextReservation++;
     }
 
     @Override
     public void unreserveBeanBags(int reservationNumber) throws ReservationNumberNotRecognisedException {
-
+        int counter = 0;
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getReservationNumber().equals(reservationNumber)){
+                b.setUnreserved();
+                stock.replace(b, i);
+                counter++;
+            }
+        }
+        if (counter==0)
+            throw ReservationNumberNotRecognisedException;
     }
 
     @Override
     public void sellBeanBags(int reservationNumber) throws ReservationNumberNotRecognisedException {
-
+        int counter = 0;
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getReservationNumber().equals(reservationNumber)){
+                b.setSold();
+                stock.replace(b, i);
+                counter++;
+            }
+        }
+        if (counter==0)
+            throw ReservationNumberNotRecognisedException;
     }
 
     @Override
     public int beanBagsInStock() {
-        return 0;
+        int counter = 0;
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getSold()==false){
+                counter++;
+            }
+        }
+        return counter;
     }
 
     @Override
     public int reservedBeanBagsInStock() {
-        return 0;
+        int counter = 0;
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getReserved()==true){
+                counter++;
+            }
+        }
+        return counter;
+    }
     }
 
     @Override
     public int beanBagsInStock(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
-        return 0;
+        int counter = 0;
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getID().equals(id) && !b.getSold()){
+                counter++;
+            }
+        }
+        return counter;
     }
 
     @Override
@@ -209,17 +293,62 @@ public class Store implements BeanBagStore{
 
     @Override
     public int getNumberOfDifferentBeanBagsInStock() {
-        return 0;
+        int counter = 0;
+        ObjectArrayList knownIDs = new ObjectArrayList();
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            boolean isIn = false;
+            for (int j = 0; j < knownIDs.size(); j++) {
+                if(b.getID()==knownIDs.get(j))
+                    isIn=true;
+            }
+            if (!isIn){
+                knownIDs.add(b.getID())
+            }
+        }
+        return knownIDs.size();
     }
 
     @Override
     public int getNumberOfSoldBeanBags() {
-        return 0;
+        int counter = 0;
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getSold()){
+                counter++;
+            }
+        }
+        return counter;
     }
 
     @Override
     public int getNumberOfSoldBeanBags(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
-        return 0;
+        int counter = 0;
+        int counter2 = 0;
+        for (int i = 0; i < stock.size(); i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if ( && ){
+                counter++;
+            }
+            if (b.getID().equals(id)) {
+                if(b.getSold())
+                    counter++;
+                counter2++;
+            }
+        }
+        if (counter2 == 0){
+            throw new BeanBagIDNotRecognisedException("The id is not recognised");
+        }
+
+        if (id.length() != 8){
+            throw new IllegalIDException("ID length invalid.");
+        }
+        try{
+            Integer.parseInt(id, 16);
+        } catch(Exception e){
+            throw new IllegalIDException("Not a hexadecimal number.");
+        }
+        return counter;
     }
 
     @Override
@@ -255,5 +384,10 @@ public class Store implements BeanBagStore{
     @Override
     public void replace(String oldId, String replacementId) throws BeanBagIDNotRecognisedException, IllegalIDException {
 
+    }
+
+    public static void main(String[] args) {
+        Store str = new Store();
+        str.
     }
 }
