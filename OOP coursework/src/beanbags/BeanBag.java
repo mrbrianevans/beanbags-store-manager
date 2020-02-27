@@ -9,7 +9,7 @@ public class BeanBag {
     private String manufacturer;
     private String information;
     private boolean sold;
-    private boolean reserved;
+    private int reservationNumber;
 
     public BeanBag(String ID, String name, String manufacturer, short year, byte month){
         this.ID = Integer.parseInt(ID,16);
@@ -36,12 +36,13 @@ public class BeanBag {
         this.sold = true;
     }
 
-    public void setReserved(){
-        this.reserved = true;
+
+    public void setReserved(int reservationNumber){
+        this.reservationNumber = reservationNumber;
     }
 
     public void setUnreserved(){
-        this.reserved = false;
+        this.reservationNumber = 0;
     }
 
     public void setID(String ID){
@@ -50,6 +51,10 @@ public class BeanBag {
 
     public int getID(){
         return this.ID;
+    } // dont need 'this.' - just the parameter name.
+
+    public String getStringID(){
+        return this.ID+"";
     }
 
     public String getInformation(){
@@ -57,7 +62,7 @@ public class BeanBag {
     }
 
     public boolean getReserved(){
-        return this.reserved;
+        return this.reservationNumber!=0;
     }
 
     public boolean getSold(){
@@ -66,5 +71,21 @@ public class BeanBag {
 
     public double getPrice(){
         return this.price;
+    }
+
+    public String getName(){
+        return this.name;
+    }
+
+    public String getManufacturer(){
+        return this.manufacturer;
+    }
+
+    public boolean getAvailable(){
+        return this.getReserved() && this.getSold();
+    }
+
+    public int getReservationNumber(){
+        return this.reservationNumber;
     }
 }
