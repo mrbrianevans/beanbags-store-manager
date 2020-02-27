@@ -11,7 +11,8 @@ public class Store implements BeanBagStore{
 
     @Override
     public void addBeanBags(int num, String manufacturer, String name, String id, short year, byte month) throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException, IllegalIDException, InvalidMonthException {
-        if (num<1) throw new IllegalNumberOfBeanBagsAddedException();
+        if (num<1)
+            throw new IllegalNumberOfBeanBagsAddedException("Enter a positive number of beanbags to sell");
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
             if (b.getID().equals(id)){
@@ -176,7 +177,7 @@ public class Store implements BeanBagStore{
             throw new InsufficientStockException("There are only "+counter+" bags in stock.");
         }
         if (num < 1){
-            throw new IllegalNumberOfBeanBagsSoldException("At least one bean bag must be reserved.");
+            throw new IllegalNumberOfBeanBagsReservedException("At least one bean bag must be reserved.");
         }
 
         for (int i = 0; i < stock.size(); i++) {
@@ -211,7 +212,7 @@ public class Store implements BeanBagStore{
             }
             counter2++;
         }
-        nextReservation++;
+        return nextReservation++;
     }
 
     @Override
@@ -219,14 +220,14 @@ public class Store implements BeanBagStore{
         int counter = 0;
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if (b.getReservationNumber().equals(reservationNumber)){
+            if (b.getReservationNumber()==(reservationNumber)){
                 b.setUnreserved();
                 stock.replace(b, i);
                 counter++;
             }
         }
         if (counter==0)
-            throw ReservationNumberNotRecognisedException;
+            throw new ReservationNumberNotRecognisedException();
     }
 
     @Override
@@ -234,14 +235,14 @@ public class Store implements BeanBagStore{
         int counter = 0;
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if (b.getReservationNumber().equals(reservationNumber)){
+            if (b.getReservationNumber()==(reservationNumber)){
                 b.setSold();
                 stock.replace(b, i);
                 counter++;
             }
         }
         if (counter==0)
-            throw ReservationNumberNotRecognisedException;
+            throw new ReservationNumberNotRecognisedException();
     }
 
     @Override
@@ -249,7 +250,7 @@ public class Store implements BeanBagStore{
         int counter = 0;
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if (b.getSold()==false){
+            if (!b.getSold()){
                 counter++;
             }
         }
@@ -261,13 +262,13 @@ public class Store implements BeanBagStore{
         int counter = 0;
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if (b.getReserved()==true){
+            if (b.getReserved()){
                 counter++;
             }
         }
         return counter;
     }
-    }
+
 
     @Override
     public int beanBagsInStock(String id) throws BeanBagIDNotRecognisedException, IllegalIDException {
@@ -303,7 +304,7 @@ public class Store implements BeanBagStore{
                     isIn=true;
             }
             if (!isIn){
-                knownIDs.add(b.getID())
+                knownIDs.add(b.getID());
             }
         }
         return knownIDs.size();
@@ -327,9 +328,6 @@ public class Store implements BeanBagStore{
         int counter2 = 0;
         for (int i = 0; i < stock.size(); i++) {
             BeanBag b = (BeanBag) stock.get(i);
-            if ( && ){
-                counter++;
-            }
             if (b.getID().equals(id)) {
                 if(b.getSold())
                     counter++;
@@ -388,6 +386,6 @@ public class Store implements BeanBagStore{
 
     public static void main(String[] args) {
         Store str = new Store();
-        str.
+        str.addBeanBags(1, "Beans Ltd.", "Coffee Bean", "10F4E771", (short)2019, (byte)12);
     }
 }
