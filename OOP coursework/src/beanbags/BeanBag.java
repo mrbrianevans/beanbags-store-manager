@@ -50,10 +50,12 @@ public class BeanBag {
         this.ID = Integer.parseInt(ID, 16);
     }
 
-
-
     public String getID(){
-        return ID+"";
+        return Integer.toHexString(ID);
+    }
+
+    public String getDate(){
+        return year + " " + month;
     }
 
     public String getInformation(){
@@ -81,7 +83,7 @@ public class BeanBag {
     }
 
     public boolean getAvailable(){
-        return getReserved() && getSold();
+        return !getReserved() && !getSold();
     }
 
     public int getReservationNumber(){
