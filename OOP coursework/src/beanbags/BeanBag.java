@@ -1,6 +1,7 @@
 package beanbags;
+import java.io.Serializable;
 
-public class BeanBag {
+public class BeanBag implements Serializable{
     private int ID;
     private String name;
     private double price;
@@ -75,8 +76,8 @@ public class BeanBag {
     }
 
     public String getName(){
-        return name;
-    }
+    return name;
+}
 
     public String getManufacturer(){
         return manufacturer;
