@@ -36,7 +36,7 @@ public class Store implements BeanBagStore{
     String BeanBagNotInStockMessage = "The beanbag requested is not currently in stock";
     String IllegalNumberOfBeanBagsSoldMessage = "You have to sell at least one beanbag";
     String reservedExceptionMessage = "At least one bean bag must be reserved.";
-
+    String reservationNumberNotRecognisedException = "There are no current reservations with that reservation number";
     /**
      * Checks the ID to ensure that is is in the required form and throws exceptions if not.
      *
@@ -69,6 +69,7 @@ public class Store implements BeanBagStore{
      */
     private void checkForBeanBagMismatch(String manufacturer, String name, String id)
             throws BeanBagMismatchException {
+        id = id.toLowerCase();
         for (int i = 0; i < stock.size(); i++) {
             /* Loop through all stock, incrementing by one each time. */
             BeanBag b = (BeanBag) stock.get(i); // Obtain the object stored with index i in stock
@@ -85,7 +86,7 @@ public class Store implements BeanBagStore{
     public void addBeanBags(int num, String manufacturer, String name, String id, short year,
                             byte month) throws IllegalNumberOfBeanBagsAddedException,
             BeanBagMismatchException, IllegalIDException, InvalidMonthException {
-
+        id = id.toLowerCase();
         checkID(id);
         if (num<1)
             /* Handle the condition */
@@ -101,8 +102,10 @@ public class Store implements BeanBagStore{
                             byte month, String information)
             throws IllegalNumberOfBeanBagsAddedException, BeanBagMismatchException,
             IllegalIDException, InvalidMonthException {
+        id = id.toLowerCase();
         checkID(id); // Check ID for IllegalIDException
-        if (num<1) throw new IllegalNumberOfBeanBagsAddedException(); // Throws exception if num of bags is less than 1
+        if (num<1) throw new IllegalNumberOfBeanBagsAddedException(nonNaturalNumberMessage);
+        // Throws exception if num of bags is less than 1
         checkForBeanBagMismatch(manufacturer, name, id); // Checks for BeanBagMismatchException
 
         if((month > 12) || (month < 1)) throw new InvalidMonthException(invalidMonthMessage);
@@ -113,6 +116,7 @@ public class Store implements BeanBagStore{
     @Override
     public void setBeanBagPrice(String id, int priceInPence)
             throws InvalidPriceException, BeanBagIDNotRecognisedException, IllegalIDException {
+        id = id.toLowerCase();
         checkID(id); // Check for IllegalIDException
         if (priceInPence < 1) throw new InvalidPriceException(invalidPriceMessage);
         int counter = 0;
@@ -133,6 +137,7 @@ public class Store implements BeanBagStore{
             throws BeanBagNotInStockException, InsufficientStockException,
             IllegalNumberOfBeanBagsSoldException, PriceNotSetException,
             BeanBagIDNotRecognisedException, IllegalIDException {
+        id = id.toLowerCase();
         checkID(id); // Check id for IllegalIDException
         int counter = 0;
         for (int i = 0; i < stock.size(); i++) { // Loop through entire stock
@@ -175,6 +180,7 @@ public class Store implements BeanBagStore{
     public int reserveBeanBags(int num, String id) throws BeanBagNotInStockException,
             InsufficientStockException, IllegalNumberOfBeanBagsReservedException,
             PriceNotSetException, BeanBagIDNotRecognisedException, IllegalIDException {
+        id = id.toLowerCase();
         checkID(id); // Check id for IllegalIDException
         int counter = 0;
         for (int i = 0; i < stock.size(); i++) { // Loop through entire stock
@@ -246,7 +252,7 @@ public class Store implements BeanBagStore{
                 counter++; // increment counter by 1
             }
         }
-        if (counter==0) throw new ReservationNumberNotRecognisedException();
+        if (counter==0) throw new ReservationNumberNotRecognisedException(reservationNumberNotRecognisedException);
     }
 
     @Override
@@ -277,7 +283,7 @@ public class Store implements BeanBagStore{
     @Override
     public int beanBagsInStock(String id)
             throws BeanBagIDNotRecognisedException, IllegalIDException {
-
+        id = id.toLowerCase();
         checkID(id); // Checks for IllegalIDException
         int counter = 0;
         for (int i = 0; i < stock.size(); i++) { // Loop through entire stock of bean bags
@@ -347,6 +353,7 @@ public class Store implements BeanBagStore{
     @Override
     public int getNumberOfSoldBeanBags(String id)
             throws BeanBagIDNotRecognisedException, IllegalIDException {
+        id = id.toLowerCase();
         checkID(id);
         int counter = 0;
         int counter2 = 0;
@@ -374,6 +381,7 @@ public class Store implements BeanBagStore{
     @Override
     public int getTotalPriceOfSoldBeanBags(String id)
             throws BeanBagIDNotRecognisedException, IllegalIDException {
+        id = id.toLowerCase();
         checkID(id); // Check ID for IllegalIDException
         int counter = 0;
         int counter2 = 0;
@@ -402,7 +410,7 @@ public class Store implements BeanBagStore{
     @Override
     public String getBeanBagDetails(String id)
             throws BeanBagIDNotRecognisedException, IllegalIDException {
-
+        id = id.toLowerCase();
         checkID(id); // Check ID for IllegalIDException
         for (int i = 0; i < stock.size(); i++) { // Loop through the entire of the stock of bean bags
             BeanBag b = (BeanBag) stock.get(i);
@@ -442,39 +450,5 @@ public class Store implements BeanBagStore{
         }
         if (counter == 0) throw new BeanBagIDNotRecognisedException(BeanBagIDNotRecognisedMessage);
     }
-
-    void printBeanbag(){
-        for (int i = 0; i < stock.size(); i++) {
-            BeanBag b = (BeanBag) stock.get(i);
-            System.out.println("name: " + b.getName());
-            System.out.println("ID: " + b.getID());
-            System.out.println("Manufacturer: " + b.getManufacturer());
-            System.out.println("Information: " + b.getInformation());
-            System.out.println("Available: " + b.getAvailable());
-            System.out.println("Date: " + b.getDate());
-            System.out.println("reservation number: " + b.getReservationNumber());
-            System.out.println("price set: " + b.getPrice());
-            System.out.println("Sold: " + b.getSold());
-            System.out.println();
-        }
-    }
-
-    public static void main(String[] args) throws IllegalIDException, BeanBagMismatchException, InvalidMonthException, IllegalNumberOfBeanBagsAddedException, PriceNotSetException, BeanBagIDNotRecognisedException, BeanBagNotInStockException, InsufficientStockException, IllegalNumberOfBeanBagsSoldException, InvalidPriceException, IllegalNumberOfBeanBagsReservedException, ReservationNumberNotRecognisedException, IOException, ClassNotFoundException {
-        Store str = new Store();
-
-        str.addBeanBags(1, "Beans Ltd.", "Coffee Bean", "31415926", (short)2019, (byte)7, "");
-        str.addBeanBags(2, "Beans Ltd.", "Coffee Bean", "31415934", (short)2019, (byte)7, "");
-        str.setBeanBagPrice("31415926", 100);
-        str.setBeanBagPrice("31415934", 200);
-        str.sellBeanBags(2, "31415934");
-        str.reserveBeanBags(1, "31415926");
-        str.printBeanbag();
-        System.out.println(str.nextReservation);
-        str.saveStoreContents("test.txt");
-        str.empty();
-        str.loadStoreContents("test.txt");
-        System.out.println(str.nextReservation);
-        str.printBeanbag();
-    }
-}
+} // end of class Store
 
