@@ -1,12 +1,6 @@
 package beanbags;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.stream.IntStream;
+import java.io.*;
 
 /**
  * Store interface. This class provides a fully functioning implementor
@@ -122,14 +116,21 @@ public class Store implements BeanBagStore{
         int counter = 0;
         for (int i = 0; i < stock.size(); i++) { // Loop through entire stock
             BeanBag b = (BeanBag) stock.get(i);
-            if (b.getID().equals(id)){
-                b.setPrice(priceInPence); // If condition met then set price
-                stock.replace(b, i); // Replace the original price with the new one
+            if (b.getID().equals(id)) { // check if the ID matches
                 counter ++;
+                if (b.getReserved() && 0 < b.getPrice() && b.getPrice() < priceInPence) { // check if its reserved
+                    // this gives the customer the benefit if they reserved a beanbag. They will always get the lower price
+                    continue;
+                } else if (b.getSold()) {
+                    // if a beanbag has already been sold, then don't adjust the price as this would alter sales figures
+                    continue;
+                }
+                b.setPrice(priceInPence); // If the beanbag is not sold, or reserved with a lower price, then setPrice
+                stock.replace(b, i); // Replace the original stock item, with the updated one
             }
         }
         if(counter == 0) throw new BeanBagIDNotRecognisedException(BeanBagIDNotRecognisedMessage);
-
+        // if counter has not incremented, then no ID's matched the search and a BeanBagIDNotRecognisedException is thrown
     }
 
     @Override
@@ -372,9 +373,16 @@ public class Store implements BeanBagStore{
     @Override
     public int getTotalPriceOfSoldBeanBags() {
         /*For the entirety of the stock, get the total price of sold bean bags*/
-        int counter = IntStream.range(0, stock.size()).mapToObj(i -> {
-            return (BeanBag) stock.get(i);
-        }).filter(BeanBag::getSold).mapToInt(b -> (int) b.getPrice()).sum(); // Counter is set to the sum of sold bags
+        // Counter is set to the sum of sold bags
+        int counter = 0;
+        int bound = stock.size();
+        for (int i = 0; i < bound; i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getSold()) {
+                int price = (int) b.getPrice();
+                counter += price;
+            }
+        }
         return counter;
     }
 
@@ -401,9 +409,15 @@ public class Store implements BeanBagStore{
     public int getTotalPriceOfReservedBeanBags() {
         /*Loops through the stock for reserved bean bags and adds them to the
         counter for a final price sum for reservations*/
-        int counter = IntStream.range(0, stock.size()).mapToObj(i -> {
-            return (BeanBag) stock.get(i);
-        }).filter(BeanBag::getReserved).mapToInt(b -> (int) b.getPrice()).sum();
+        int counter = 0;
+        int bound = stock.size();
+        for (int i = 0; i < bound; i++) {
+            BeanBag b = (BeanBag) stock.get(i);
+            if (b.getReserved()) {
+                int price = (int) b.getPrice();
+                counter += price;
+            }
+        }
         return counter;
     }
 

@@ -42,12 +42,19 @@ class BeanBag implements Serializable{
      * @param information A text field to contain free trade information etc
      */
     BeanBag(String ID, String name, String manufacturer, short year, byte month, String information){
+        // assert statements to check that internal methods are passing the right values to the constructor.
+        // this checks pre-conditions. The methods in Store.java should throw exceptions for invalid input
+        assert 0 < month;
+        assert month < 13;
+        assert ID.length() == 8;
+
         this.ID = Integer.parseInt(ID,16);
         this.name = name;
         this.manufacturer = manufacturer;
         this.year = year;
         this.month = month;
         this.information = information;
+        assert Integer.toHexString(this.ID).length() == 8; // post condition to check the conversion was correct
     }
 
     /**
@@ -55,6 +62,7 @@ class BeanBag implements Serializable{
      * @param price Price to set the current instance of BeanBag
      */
     void setPrice(double price){
+        assert price > 0; // checks that the internal method only passes a positive price to the package-private setter method
         this.price = price;
     }
 
@@ -95,6 +103,7 @@ class BeanBag implements Serializable{
      * @return A String object of the BeanBag's ID
      */
     String getID(){
+        assert Integer.toHexString(ID).length() == 8; // pre-condition to make sure its returning a valid ID
         return Integer.toHexString(ID);
     }
 
